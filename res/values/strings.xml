@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="hello">Hello World, BCalcActivity!</string>
+    <string name="app_name">BCalc</string>
+    <string name="EditText">Edit</string>
+    <string name="DeleteText">Delete</string >
+    
+	<color name="titlebackgroundcolor">#CC0000</color>
+    <color name="titletextcolor">#FFFFFF</color>
+    <color name="background">#F0F0E0</color>
+    <color name="list_background">#00000000</color>
+    <color name="list_divider">#D5D1CF</color>
+    <color name="list_text_color">#505050</color>
+    <color name="list_sub_text_color">#85818F</color>
+    <color name="calc_text_color">#505050</color>
+    <color name="calc_result_text_color">#85818F</color>
+    <color name="calc_result_text_color_error">#CC0000</color>
+</resources>

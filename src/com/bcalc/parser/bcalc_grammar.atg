@@ -1,0 +1,193 @@
+// Imports
+import android.util.Log;
+
+// Name of the grammar.
+COMPILER BCalc
+
+// Add auxiliary methods and declaration here.
+
+// Case insensitive.
+IGNORECASE
+
+
+CHARACTERS
+// Add character set declarations here.
+// Examples:
+//   cr = '\r'.
+//   lf = '\n'.
+letter = 'a'..'z'.
+digit = "0123456789".
+
+TOKENS
+// Add token declarations here.
+// Example:
+//   ident = letter {letter | digit}.
+number = digit { digit } [ "." digit { digit } ] .
+
+
+PRAGMAS
+// Add pragma declarations here.
+// Example:
+//   switch = '$' { digit | letter }. (. Optional semantic action .)
+
+
+// Add comments here.
+// Example for a multi-line block comment:
+//   COMMENTS FROM "/*" TO "*/" NESTED
+// Example for a single line comment:
+//   COMMENTS FROM "//" TO lf
+
+
+// Set the ignored characters (whitespaces) here, the blank character is
+// ignored by default.
+// Example, add line breaks to the ignore set.
+//   IGNORE cr + lf
+
+
+PRODUCTIONS
+
+// Add your productions here, one must have the same name as the grammar,
+// it will be the start symbol (entry point of your compiler).
+// Example:
+//   Empty = "BEGIN" { Statement } "END".
+//   Statement = ident "=" number { "+" number } .
+
+BCalc                       (. int x; .)
+    = Expr<out x>           (. Log.i("Parser", Integer.toString(x)); .)
+.
+
+Expr<out int x>             (. int y; .)
+     = Term<out x>
+       {'+'Term<out y>      (. x = x + y; .)
+       }
+.
+
+Term<out int x>             (. int y; .)
+    = Factor<out x>
+      {'*' Factor<out y>    (. x = x*y; .)
+      }
+.
+
+Factor<out int x>           (. x = 0; .) 
+    = number                (. x = Integer.parseInt(t.val); .)
+    | '(' Expr<out x>')'
+.
+
+// End of the compiler specification.
+END BCalc.
+
+
+/*
+using System.Collections.Generic;
+using System.Text;
+using System.IO;
+
+using ValueList = System.Collections.Generic.List<double>;
+  
+/* ----------------------- Start Symbol ---------------------------- */
+
+COMPILER Eval  /* the "compiler" is named by the start symbol */
+
+/* ----------------------- custom code ---------------------------- */
+private double Eval(string name, ValueList args)
+{
+    string symbol = args == null ? name : string.Format("{0}({1})", name, args.Count);
+    Func<ValueList, double> func;
+    if (_symbols.TryGetValue(symbol, out func)) return func(args);
+    errors.SemErr(string.Format("Symbol not found: {0}", name));
+    return 1.0;
+}
+
+private double Eval(string name, params double[] args)
+{
+    return Eval(name, new ValueList(args));
+}
+
+public static void SetVar(string name, double val)
+{
+    if (_symbols.ContainsKey(name)) _symbols[name] = a=>val;
+    else _symbols.Add(name, a=>val);
+}
+
+private const double DEG_RAD = Math.PI/180.0;
+
+private static Dictionary<string, Func<ValueList, double>> _symbols =
+new Dictionary<string, Func<ValueList, double>>(StringComparer.InvariantCultureIgnoreCase)
+{
+    { "+(2)", a=> a[0]+a[1] },
+    { "-(2)", a=> a[0]-a[1] },
+    { "*(2)", a=> a[0]*a[1] },
+    { "/(2)", a=> a[0]/a[1] },
+    { "%(2)", a=> a[0]%a[1] },
+    { "^(2)", a=> Math.Pow(a[0],a[1]) },
+    { "!(1)", a=> {double v=a[0]; int i = (int)v; while(--i > 0) v*=i; return v;} },
+    { "-(1)", a=> -a[0] },
+    { "(1)", a=> a[0] },
+    { "pi", a=> Math.PI },
+    { "sin(1)", a=> Math.Sin(DEG_RAD*a[0]) },
+    { "cos(1)", a=> Math.Cos(DEG_RAD*a[0]) },
+    { "tan(1)", a=> Math.Tan(DEG_RAD*a[0]) },
+    { "exp(1)", a=> Math.Exp(a[0]) },
+    { "ln(1)", a=> Math.Log(a[0]) },
+    { "log(1)", a=> Math.Log10(a[0]) },
+};
+
+
+double _val = 0.0;
+
+public static double Evaluate(string s)
+{
+    using (var strm = new MemoryStream(Encoding.ASCII.GetBytes(s)))
+    {
+        Scanner scanner = new Scanner(strm);
+        Parser parser = new Parser(scanner);
+        parser.Parse();
+        if (parser.errors.count > 0) Console.WriteLine("Errors: {0}", parser.errors.count);
+        return parser._val;
+    }
+}
+
+/* ----------------------- Scanner ---------------------------- */
+CHARACTERS
+    letter = 'A'..'Z' + 'a'..'z'.
+    digit  = '0'..'9'.
+TOKENS
+    ident  = letter { letter | digit }.
+    number = digit { digit } [ '.' digit { digit } ] .
+IGNORE ' ' + '\t'
+
+/* ----------------------- Parser ---------------------------- */
+PRODUCTIONS
+
+Eval = Expr<ref _val> .
+
+Expr<ref double val>                                           (. double v = 0; string op; .)
+= Term<ref v>                                                  (. val = v; .)
+  { ("+"|"-") (. op=t.val; .) Term<ref v>                      (. val = Eval(op, val, v); .)
+  }
+  { "!"                                                        (. val = Eval(t.val); .)
+  } .
+Term<ref double val>                                           (. double v = 0; string op; .)
+= Factor<ref v>                                                (. val  = v; .)
+  { ("*"|"/"|"%"|"^") (. op=t.val; .) Factor<ref v>            (. val = Eval(op, val, v); .)
+  } .
+Factor<ref double val>                                         (. double v = 0; string op = ""; .)
+=   number                                                     (. val = double.Parse(t.val); .)
+  | Name<ref v>                                                (. val = v; .)
+  | "(" ["-" (. op=t.val; .) ] Expr<ref v> ")"                 (. val = Eval(op, v); .)
+  .
+Name<ref double val>                                           (. ValueList args = null; string name; .)
+= ident                                                        (. name = t.val; .)
+  ["(" (. args = new ValueList(); .) [ArgList<ref args>] ")"]  (. val = Eval(name, args); .)
+  .
+ArgList<ref ValueList args>                                    (. double v = 0; .)
+= Expr<ref v>                                                  (. args.Add(v);  .)
+  { "," Expr<ref v>                                            (. args.Add(v);  .)
+  }
+  .
+
+END Eval.
+
+/* ----------------------- that's it folks! ---------------------------- */
+
+*/
