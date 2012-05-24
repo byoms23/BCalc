@@ -7,15 +7,17 @@
   android:padding="5dp"
   android:orientation="vertical">
  
-<com.bcalc.components.CalcWidget android:id="@+id/txtCalcOperation"
+<com.bcalc.widget.CalcWidget android:id="@+id/txtCalcOperation"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:singleLine="true"
     android:typeface="monospace"
     android:textColor="@color/calc_text_color"
     android:textStyle="bold"
-    android:textSize="20dp" />
- 
+    android:textSize="20dp"
+    android:inputType="phone" 
+    />
+<!--     android:singleLine="true" -->
+
 <TextView android:id="@+id/lblCalcResult"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"

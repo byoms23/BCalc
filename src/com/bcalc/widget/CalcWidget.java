@@ -1,7 +1,9 @@
-package com.bcalc.components;
+package com.bcalc.widget;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 
+import com.bcalc.operations.BCalcToken;
 import com.bcalc.parser.Parser;
 import com.bcalc.parser.Scanner;
 
@@ -25,6 +27,8 @@ public class CalcWidget extends EditText {
 	
 	private int lastCursorPosition;
 	private boolean cursorDraw = true;
+	private OnCalcListener calcListener;
+	private BCalcToken calc;
 
 	public CalcWidget(Context context, AttributeSet attrs, int defStyle){
 	    super(context, attrs,defStyle);
@@ -44,7 +48,8 @@ public class CalcWidget extends EditText {
 		super.onKeyUp(keyCode, event);
 		
 		if(keyCode == KeyEvent.KEYCODE_ENTER) {
-			
+			calcListener.onCalc(getText().toString(), Double.toString(calc.evaluate()));
+			return true;
 		}
 		
 		return false;
@@ -53,17 +58,12 @@ public class CalcWidget extends EditText {
 	@Override
 	public void onDraw(Canvas canvas) {
 		// Parse the expression
-	    Log.i("EditText", Integer.toString(getSelectionStart()));
-		if(lastCursorPosition != getSelectionEnd()) {
+	    if(lastCursorPosition != getSelectionEnd()) {
 			lastCursorPosition = getSelectionEnd();
 			Log.i("EditText", "Parse");
 			
-//			String inFileName;
-//			String outFileName;
-//			Scanner scanner = new Scanner(inFileName);
-//			Parser parser = new Parser(scanner);
-//			parser.Parse();
-//				System.out.println(parser.errors.count + " errors detected");
+			calc = Parser.parseBCalcExpression(getText().toString());
+			Log.i("EditText", calc+ "");
 		}
 		
 		// Draw the background
@@ -75,13 +75,27 @@ public class CalcWidget extends EditText {
 	    paint.setStyle(Style.FILL_AND_STROKE);
 	    paint.setColor(Color.BLACK);
 	    paint.setAntiAlias(true);
-	    
-	    paint.setTextSize(25);
-	    canvas.drawText("99", 5, 35, paint);
-	    
-	    if(cursorDraw && hasFocus()) {
-	    	canvas.drawText("|", 5, 35, paint);
+//	    paint.setTextSize(20);
+//	    canvas.drawText("99888", 10, 30, paint);
+	    try {
+	    	calc.onDraw(canvas, 10, 30, lastCursorPosition, cursorDraw);
+		    if(cursorDraw && hasFocus()) {
+		    	canvas.drawText("|", 15, 30, paint);
+//	    		canvas.drawText("|", 26, 30, paint);
+//	    		canvas.drawText("|", 37, 30, paint);
+//	    		canvas.drawText("|", 48, 30, paint);
+		    }
+		    cursorDraw = !cursorDraw;
+	    } catch (Exception e) {
+	    	super.onDraw(canvas);
 	    }
-	    cursorDraw = !cursorDraw;
+	}
+
+	public OnCalcListener getCalcListener() {
+		return calcListener;
+	}
+
+	public void setCalcListener(OnCalcListener calcListener) {
+		this.calcListener = calcListener;
 	}
 }

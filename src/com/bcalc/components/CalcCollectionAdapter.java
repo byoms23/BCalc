@@ -46,7 +46,7 @@ public class CalcCollectionAdapter extends ArrayAdapter<CalcCollection> {
     		holder = (ViewHolder)item.getTag();
     	}
 		
-    	holder.lblCalcCollectionTitle.setText(data.get(position).getTitle() + ": " + data.get(position).getId());
+    	holder.lblCalcCollectionTitle.setText(data.get(position).getTitle());
     	if(data.get(position).getDate() != null) {
 			DateFormat dateFormat = 
 					android.text.format.DateFormat.getDateFormat(context.getApplicationContext())

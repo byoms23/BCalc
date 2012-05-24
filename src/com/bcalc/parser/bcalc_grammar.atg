@@ -1,10 +1,44 @@
 // Imports
 import android.util.Log;
+import com.bcalc.operations.*;
+import com.bcalc.operations.Number;
+import java.io.InputStream;
+import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 
 // Name of the grammar.
 COMPILER BCalc
 
 // Add auxiliary methods and declaration here.
+public static BCalcToken parseBCalcExpression(String s)
+{
+    BCalcToken x = null;
+    try {
+        InputStream is = new ByteArrayInputStream(s.getBytes("UTF-8"));
+        Scanner scanner = new Scanner(is);
+        Parser parser = new Parser(scanner);
+        x = parser.Parse(true);
+        if (parser.errors.count > 0) 
+        Log.e("ERROR", "Parsing errors: "+parser.errors.count);
+    } catch (UnsupportedEncodingException e) {
+        e.printStackTrace();
+    }
+    
+    return x;
+    //return parser._val;
+}
+
+public BCalcToken Parse(Boolean b) {
+    la = new Token();
+    la.val = "";        
+    Get();
+    BCalcToken x = BCalc();
+    Expect(0);
+    return x;
+
+}
+
 
 // Case insensitive.
 IGNORECASE
@@ -21,7 +55,7 @@ digit = "0123456789".
 TOKENS
 // Add token declarations here.
 // Example:
-//   ident = letter {letter | digit}.
+ident = letter {letter | digit}.
 number = digit { digit } [ "." digit { digit } ] .
 
 
@@ -52,29 +86,52 @@ PRODUCTIONS
 //   Empty = "BEGIN" { Statement } "END".
 //   Statement = ident "=" number { "+" number } .
 
-BCalc                       (. int x; .)
-    = Expr<out x>           (. Log.i("Parser", Integer.toString(x)); .)
-.
 
-Expr<out int x>             (. int y; .)
-     = Term<out x>
-       {'+'Term<out y>      (. x = x + y; .)
-       }
-.
-
-Term<out int x>             (. int y; .)
-    = Factor<out x>
-      {'*' Factor<out y>    (. x = x*y; .)
-      }
-.
-
-Factor<out int x>           (. x = 0; .) 
-    = number                (. x = Integer.parseInt(t.val); .)
-    | '(' Expr<out x>')'
-.
+BCalc<out BCalcToken x>                                         //(. BCalcToken x; .)
+  = Expr<out x>                                                             (. Log.i("Parser", "Processing... "); .)
+  .
+  
+Expr<out BCalcToken x>                                                      (. BCalcToken y; String op; .)
+= Term<out y>                                                               (. x = y; .)
+  { ("+"|"-") (. op=t.val; .) Term<out x>                                   (. x = new SingleLineOperation(op, y, x); .)
+  }
+  { ("!"|"%") (. op=t.val; .)                                               (. x = new SingleTermOperation(op, x); .)
+  } 
+  .
+  
+Term<out BCalcToken x>                                                      (. BCalcToken y; String op; .)
+= Factor<out y>                                                             (. x = y; .)
+  { ("*"|"/"|"%"|"^") (. op=t.val; .) Factor<out y>                         (. 
+  if(op.equals("/") || op.equals("^")) {
+    x = new MultipleLineOperation(op, x, y);
+  } else {
+    x = new SingleLineOperation(op, x, y);
+  }
+                                                                            .)
+  } 
+  .
+  
+Factor<out BCalcToken x>                                                    (. x = null; BCalcToken y; String op = ""; .)
+  = number                                                                  (. x = new Number(t.val); .)
+  | Name<out y>                                                             (. x = y; .)
+  | "-" (. op=t.val; .) Expr<out y>                                         (. x = new SingleTermOperation(op, y); .)
+  | "(" (. op=op+t.val; .) Expr<out y> ")" (. op=op+t.val; .)               (. x = new MultipleLineOperation(op, y); .)
+  .
+  
+Name<out BCalcToken x>                                                      (. ArrayList<BCalcToken> args = null; String name; .)
+  = ident                                                                   (. name = t.val; .)
+  ["(" (. args = new ArrayList<BCalcToken>(); .) [ArgList<out args>] ")"]   (. x = new Function(name, args); .)
+  .
+  
+ArgList<out ArrayList args>                                                 (. args = new ArrayList<BCalcToken>();BCalcToken y; .)
+  = Expr<out y>                                                             (. args.add(y);  .)
+  { "," Expr<out y>                                                         (. args.add(y);  .)
+  }
+  .
 
 // End of the compiler specification.
 END BCalc.
+
 
 
 /*
@@ -191,3 +248,31 @@ END Eval.
 /* ----------------------- that's it folks! ---------------------------- */
 
 */
+
+
+
+/*
+
+BCalc                       (. int x; .)
+    = Expr<out x>           (. Log.i("Parser", "Value: " + Integer.toString(x)); .)
+.
+
+Expr<out int x>             (. int y; .)
+     = Term<out x>
+       {'+'Term<out y>      (. x = x + y; .)
+       }
+.
+
+Term<out int x>             (. int y; .)
+    = Factor<out x>
+      {'*' Factor<out y>    (. x = x*y; .)
+      }
+.
+
+Factor<out int x>           (. x = 0; .) 
+    = number                (. x = Integer.parseInt(t.val); .)
+    | '(' Expr<out x>')'
+.
+
+ */
+ 

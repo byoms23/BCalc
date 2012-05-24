@@ -251,8 +251,8 @@ class StartStates {
 public class Scanner {
 	static final char EOL = '\n';
 	static final int  eofSym = 0;
-	static final int maxT = 6;
-	static final int noSym = 6;
+	static final int maxT = 13;
+	static final int noSym = 13;
 	char valCh;       // current input character (for token.val)
 
 	public Buffer buffer; // scanner buffer
@@ -277,11 +277,18 @@ public class Scanner {
 	static {
 		start = new StartStates();
 		literals = new HashMap();
-		for (int i = 48; i <= 57; ++i) start.set(i, 1);
-		start.set(43, 4); 
-		start.set(42, 5); 
-		start.set(40, 6); 
-		start.set(41, 7); 
+		for (int i = 97; i <= 122; ++i) start.set(i, 1);
+		for (int i = 48; i <= 57; ++i) start.set(i, 2);
+		start.set(43, 5); 
+		start.set(45, 6); 
+		start.set(33, 7); 
+		start.set(37, 8); 
+		start.set(42, 9); 
+		start.set(47, 10); 
+		start.set(94, 11); 
+		start.set(40, 12); 
+		start.set(41, 13); 
+		start.set(44, 14); 
 		start.set(Buffer.EOF, -1);
 
 	}
@@ -380,24 +387,40 @@ public class Scanner {
 				} // NextCh already done
 				case 1:
 					recEnd = pos; recKind = 1;
-					if (ch >= '0' && ch <= '9') {AddCh(); state = 1; break;}
-					else if (ch == '.') {AddCh(); state = 2; break;}
+					if (ch >= '0' && ch <= '9' || ch >= 'a' && ch <= 'z') {AddCh(); state = 1; break;}
 					else {t.kind = 1; break loop;}
 				case 2:
-					if (ch >= '0' && ch <= '9') {AddCh(); state = 3; break;}
-					else {state = 0; break;}
+					recEnd = pos; recKind = 2;
+					if (ch >= '0' && ch <= '9') {AddCh(); state = 2; break;}
+					else if (ch == '.') {AddCh(); state = 3; break;}
+					else {t.kind = 2; break loop;}
 				case 3:
-					recEnd = pos; recKind = 1;
-					if (ch >= '0' && ch <= '9') {AddCh(); state = 3; break;}
-					else {t.kind = 1; break loop;}
+					if (ch >= '0' && ch <= '9') {AddCh(); state = 4; break;}
+					else {state = 0; break;}
 				case 4:
-					{t.kind = 2; break loop;}
+					recEnd = pos; recKind = 2;
+					if (ch >= '0' && ch <= '9') {AddCh(); state = 4; break;}
+					else {t.kind = 2; break loop;}
 				case 5:
 					{t.kind = 3; break loop;}
 				case 6:
 					{t.kind = 4; break loop;}
 				case 7:
 					{t.kind = 5; break loop;}
+				case 8:
+					{t.kind = 6; break loop;}
+				case 9:
+					{t.kind = 7; break loop;}
+				case 10:
+					{t.kind = 8; break loop;}
+				case 11:
+					{t.kind = 9; break loop;}
+				case 12:
+					{t.kind = 10; break loop;}
+				case 13:
+					{t.kind = 11; break loop;}
+				case 14:
+					{t.kind = 12; break loop;}
 
 			}
 		}

@@ -1,14 +1,21 @@
 package com.bcalc.parser;
 
 import android.util.Log;
+import com.bcalc.operations.*;
+import com.bcalc.operations.Number;
+import java.io.InputStream;
+import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 
 // Name of the grammar.
 
 
 public class Parser {
 	public static final int _EOF = 0;
-	public static final int _number = 1;
-	public static final int maxT = 6;
+	public static final int _ident = 1;
+	public static final int _number = 2;
+	public static final int maxT = 13;
 
 	static final boolean T = true;
 	static final boolean x = false;
@@ -21,7 +28,37 @@ public class Parser {
 	public Scanner scanner;
 	public Errors errors;
 
-	
+	public static BCalcToken parseBCalcExpression(String s)
+{
+    BCalcToken x = null;
+    try {
+        InputStream is = new ByteArrayInputStream(s.getBytes("UTF-8"));
+        Scanner scanner = new Scanner(is);
+        Parser parser = new Parser(scanner);
+        x = parser.Parse(true);
+        if (parser.errors.count > 0) 
+        Log.e("ERROR", "Parsing errors: "+parser.errors.count);
+    } catch (UnsupportedEncodingException e) {
+        e.printStackTrace();
+    }
+    
+    return x;
+    //return parser._val;
+}
+
+public BCalcToken Parse(Boolean b) {
+    la = new Token();
+    la.val = "";        
+    Get();
+    BCalcToken x = BCalc();
+    Expect(0);
+    return x;
+
+}
+
+
+// Case insensitive.
+
 
 	public Parser(Scanner scanner) {
 		this.scanner = scanner;
@@ -81,48 +118,120 @@ public class Parser {
 		}
 	}
 	
-	void BCalc() {
-		int x; 
+	BCalcToken  BCalc() {
+		BCalcToken  x;
 		x = Expr();
-		Log.i("Parser", Integer.toString(x)); 
+		Log.i("Parser", "Processing... "); 
+		return x;
 	}
 
-	int  Expr() {
-		int  x;
-		int y; 
-		x = Term();
-		while (la.kind == 2) {
-			Get();
-			y = Term();
-			x = x + y; 
+	BCalcToken  Expr() {
+		BCalcToken  x;
+		BCalcToken y; String op; 
+		y = Term();
+		x = y; 
+		while (la.kind == 3 || la.kind == 4) {
+			if (la.kind == 3) {
+				Get();
+			} else {
+				Get();
+			}
+			op=t.val; 
+			x = Term();
+			x = new SingleLineOperation(op, y, x); 
+		}
+		while (la.kind == 5 || la.kind == 6) {
+			if (la.kind == 5) {
+				Get();
+			} else {
+				Get();
+			}
+			op=t.val; 
+			x = new SingleTermOperation(op, x); 
 		}
 		return x;
 	}
 
-	int  Term() {
-		int  x;
-		int y; 
-		x = Factor();
-		while (la.kind == 3) {
-			Get();
+	BCalcToken  Term() {
+		BCalcToken  x;
+		BCalcToken y; String op; 
+		y = Factor();
+		x = y; 
+		while (StartOf(1)) {
+			if (la.kind == 7) {
+				Get();
+			} else if (la.kind == 8) {
+				Get();
+			} else if (la.kind == 6) {
+				Get();
+			} else {
+				Get();
+			}
+			op=t.val; 
 			y = Factor();
-			x = x*y; 
+			if(op.equals("/") || op.equals("^")) {
+			 x = new MultipleLineOperation(op, x, y);
+			} else {
+			  x = new SingleLineOperation(op, x, y);
+			}
+			                                                                          
 		}
 		return x;
 	}
 
-	int  Factor() {
-		int  x;
-		x = 0; 
-		if (la.kind == 1) {
+	BCalcToken  Factor() {
+		BCalcToken  x;
+		x = null; BCalcToken y; String op = ""; 
+		if (la.kind == 2) {
 			Get();
-			x = Integer.parseInt(t.val); 
+			x = new Number(t.val); 
+		} else if (la.kind == 1) {
+			y = Name();
+			x = y; 
 		} else if (la.kind == 4) {
 			Get();
-			x = Expr();
-			Expect(5);
-		} else SynErr(7);
+			op=t.val; 
+			y = Expr();
+			x = new SingleTermOperation(op, y); 
+		} else if (la.kind == 10) {
+			Get();
+			op=op+t.val; 
+			y = Expr();
+			Expect(11);
+			op=op+t.val; 
+			x = new MultipleLineOperation(op, y); 
+		} else SynErr(14);
 		return x;
+	}
+
+	BCalcToken  Name() {
+		BCalcToken  x;
+		ArrayList<BCalcToken> args = null; String name; 
+		Expect(1);
+		name = t.val; 
+		if (la.kind == 10) {
+			Get();
+			args = new ArrayList<BCalcToken>(); 
+			if (StartOf(2)) {
+				args = ArgList();
+			}
+			Expect(11);
+		}
+		x = new Function(name, args); 
+		return x;
+	}
+
+	ArrayList  ArgList() {
+		ArrayList  args;
+		args = new ArrayList<BCalcToken>();BCalcToken y; 
+		y = Expr();
+		args.add(y);  
+		while (la.kind == 12) {
+			Get();
+			y = Expr();
+			args.add(y);  
+		}
+		return args;
 	}
 
 
@@ -137,7 +246,9 @@ public class Parser {
 	}
 
 	private static final boolean[][] set = {
-		{T,x,x,x, x,x,x,x}
+		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
+		{x,x,x,x, x,x,T,T, T,T,x,x, x,x,x},
+		{x,T,T,x, T,x,x,x, x,x,T,x, x,x,x}
 
 	};
 
@@ -182,13 +293,20 @@ class Errors {
 		String s;
 		switch (n) {
 			case 0: s = "EOF expected"; break;
-			case 1: s = "number expected"; break;
-			case 2: s = "\"+\" expected"; break;
-			case 3: s = "\"*\" expected"; break;
-			case 4: s = "\"(\" expected"; break;
-			case 5: s = "\")\" expected"; break;
-			case 6: s = "??? expected"; break;
-			case 7: s = "invalid Factor"; break;
+			case 1: s = "ident expected"; break;
+			case 2: s = "number expected"; break;
+			case 3: s = "\"+\" expected"; break;
+			case 4: s = "\"-\" expected"; break;
+			case 5: s = "\"!\" expected"; break;
+			case 6: s = "\"%\" expected"; break;
+			case 7: s = "\"*\" expected"; break;
+			case 8: s = "\"/\" expected"; break;
+			case 9: s = "\"^\" expected"; break;
+			case 10: s = "\"(\" expected"; break;
+			case 11: s = "\")\" expected"; break;
+			case 12: s = "\",\" expected"; break;
+			case 13: s = "??? expected"; break;
+			case 14: s = "invalid Factor"; break;
 			default: s = "error " + n; break;
 		}
 		printMsg(line, col, s);
