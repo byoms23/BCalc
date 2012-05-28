@@ -1,26 +1,23 @@
 package com.bcalc.widget;
 
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-
 import com.bcalc.operations.BCalcToken;
 import com.bcalc.parser.Parser;
-import com.bcalc.parser.Scanner;
 
+import android.app.Activity;
+import android.app.Service;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
-import android.graphics.drawable.Drawable;
-import android.text.Editable;
-import android.text.method.KeyListener;
+import android.text.InputType;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager.LayoutParams;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 public class CalcWidget extends EditText {
@@ -29,18 +26,25 @@ public class CalcWidget extends EditText {
 	private boolean cursorDraw = true;
 	private OnCalcListener calcListener;
 	private BCalcToken calc;
-
+	protected InputMethodManager inputMethodManager;
+	 
 	public CalcWidget(Context context, AttributeSet attrs, int defStyle){
 	    super(context, attrs,defStyle);
+		init();
 	}
-	 
+	
 	public CalcWidget(Context context, AttributeSet attrs) {
 	    super(context, attrs);
+		init();
 	}
 
 	public CalcWidget(Context context) {
 		super(context);
-		
+		init();
+	}
+	
+	public void init() {
+//		setInputType(InputType.TYPE_CLASS_NUMBER);
 	}
 
 	@Override
@@ -48,7 +52,10 @@ public class CalcWidget extends EditText {
 		super.onKeyUp(keyCode, event);
 		
 		if(keyCode == KeyEvent.KEYCODE_ENTER) {
-			calcListener.onCalc(getText().toString(), Double.toString(calc.evaluate()));
+			calcListener.onCalc(
+					this,
+					getText().toString(), 
+					Double.toString(calc.evaluate()));
 			return true;
 		}
 		

@@ -1,16 +1,16 @@
 package com.bcalc.components;
 
-import com.bcalc.R;
+import java.text.DateFormat;
+import java.util.List;
+
 import android.app.Activity;
-import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
-import java.text.DateFormat;
-import java.util.List;
+
+import com.bcalc.R;
 
 public class CalcCollectionAdapter extends ArrayAdapter<CalcCollection> {
 

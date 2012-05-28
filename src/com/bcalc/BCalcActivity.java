@@ -1,17 +1,12 @@
 package com.bcalc;
 
-import java.util.ArrayList;
-
-import com.bcalc.components.*;
-
-import android.app.ListActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.view.Window;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
+
+import com.bcalc.components.Calc;
+import com.bcalc.components.CalcAdapter;
+import com.bcalc.components.CalcCollection;
 
 public class BCalcActivity extends BCalcHomeActivity {
 	

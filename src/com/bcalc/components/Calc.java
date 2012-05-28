@@ -31,4 +31,15 @@ public class Calc implements Serializable {
 	public void setResult(String result) {
 		this.result = result;
 	}
+	
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return  "Operation: " + operation + 
+				"\nResult: " + result;
+	}
+	
+	public boolean isCalculated() {
+		return result != null && !result.equals("");  
+	}
 }
