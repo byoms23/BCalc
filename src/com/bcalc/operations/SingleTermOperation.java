@@ -1,8 +1,9 @@
 package com.bcalc.operations;
 
 import android.graphics.Canvas;
+import android.graphics.Paint;
 
-public class SingleTermOperation implements BCalcToken {
+public class SingleTermOperation extends BCalcToken {
 
 	public SingleTermOperation(String op, BCalcToken term1) {
 		// TODO Auto-generated constructor stub
@@ -21,7 +22,7 @@ public class SingleTermOperation implements BCalcToken {
 	}
 
 	@Override
-	public void onDraw(Canvas canvas, int padLeft, int padUp, int cursorIndex, boolean Cursor) {
+	public void onDraw(Canvas canvas, Paint paint, int padLeft, int padUp, int cursorIndex, boolean Cursor) {
 		// TODO Auto-generated method stub
 
 	}
@@ -31,5 +32,4 @@ public class SingleTermOperation implements BCalcToken {
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
 }

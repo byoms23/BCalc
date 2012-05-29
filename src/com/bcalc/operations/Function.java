@@ -3,8 +3,9 @@ package com.bcalc.operations;
 import java.util.ArrayList;
 
 import android.graphics.Canvas;
+import android.graphics.Paint;
 
-public class Function implements BCalcToken {
+public class Function extends BCalcToken {
 	
 	private String name;
 	private ArrayList<BCalcToken> args;
@@ -28,7 +29,7 @@ public class Function implements BCalcToken {
 	}
 
 	@Override
-	public void onDraw(Canvas canvas, int padLeft, int padUp, int cursorIndex, boolean Cursor) {
+	public void onDraw(Canvas canvas, Paint paint, int padLeft, int padUp, int cursorIndex, boolean Cursor) {
 		// TODO Auto-generated method stub
 
 	}

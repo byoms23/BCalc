@@ -1,7 +1,12 @@
 package com.bcalc.operations;
 
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Paint.Style;
 
-public abstract class Operation implements BCalcToken {
+
+public abstract class Operation extends BCalcToken {
 
 	protected BCalcToken term1, term2;
 	protected String op; 

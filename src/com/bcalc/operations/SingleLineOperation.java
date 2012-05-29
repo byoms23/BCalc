@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
+import android.util.Log;
 
 public class SingleLineOperation extends Operation {
 	
@@ -15,28 +16,34 @@ public class SingleLineOperation extends Operation {
 	@Override
 	public int getVisualHeight() {
 		// TODO Auto-generated method stub
-		return 0;
+		int h1 = term1.getVisualHeight();
+		int h2 = term2.getVisualHeight();
+		if(h1 > h2) {
+			return h1;
+		} else {
+			return h2;
+		}
 	}
 
 	@Override
 	public int getVisualWidth() {
 		// TODO Auto-generated method stub
-		return term1.getVisualWidth()+term2.getVisualWidth()+BCalcToken.PADDING*2+BCalcToken.WIDTH;
+		return term1.getVisualWidth() + term2.getVisualWidth() + BCalcToken.PADDING_WORDS*2 + BCalcToken.WIDTH;
 	}
 
 	@Override
-	public void onDraw(Canvas canvas, int padLeft, int padUp, int cursorIndex, boolean Cursor) {
+	public void onDraw(Canvas canvas, Paint paint, int padLeft, int padUp, int cursorIndex, boolean Cursor) {
 		// TODO Auto-generated method stub
-		term1.onDraw(canvas, padLeft, padUp, cursorIndex, Cursor);
+		term1.onDraw(canvas, paint, padLeft, padUp, cursorIndex, Cursor);
 
-		Paint paint = new Paint();
-	    paint.setStyle(Style.FILL_AND_STROKE);
-	    paint.setColor(Color.BLACK);
-	    paint.setAntiAlias(true);
-	    paint.setTextSize(20);
-	    canvas.drawText(op, padLeft + term1.getVisualWidth() + BCalcToken.PADDING, padUp, paint);
+		Log.i("Prueba", (padUp + (getVisualHeight()/2) + (HEIGHT/2)) + ": " + 
+				padUp + " + " + (getVisualHeight()/2) + " + " + (HEIGHT/2)); 
+		
+		BCalcToken.drawRectangule(canvas, paint, padLeft, padUp, getVisualWidth(), getVisualHeight());
+	    canvas.drawText(op, padLeft + term1.getVisualWidth() + BCalcToken.PADDING_WORDS, padUp + (getVisualHeight()/2) + (HEIGHT/2) - 5, paint);
+//	    canvas.drawText(op, padLeft + term1.getVisualWidth() + BCalcToken.PADDING_WORDS, padUp, paint);
 
-		term2.onDraw(canvas, padLeft+term1.getVisualWidth()+BCalcToken.PADDING*2+BCalcToken.WIDTH, padUp, cursorIndex, Cursor);
+		term2.onDraw(canvas, paint, padLeft + term1.getVisualWidth() + BCalcToken.PADDING_WORDS*2 + BCalcToken.WIDTH, padUp, cursorIndex, Cursor);
 	}
 
 	@Override

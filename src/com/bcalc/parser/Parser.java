@@ -173,7 +173,7 @@ public BCalcToken Parse(Boolean b) {
 			 x = new MultipleLineOperation(op, x, y);
 			} else {
 			  x = new SingleLineOperation(op, x, y);
-			}
+			} 
 			                                                                          
 		}
 		return x;
