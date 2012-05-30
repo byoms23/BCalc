@@ -36,8 +36,9 @@ public class Parser {
         Scanner scanner = new Scanner(is);
         Parser parser = new Parser(scanner);
         x = parser.Parse(true);
-        if (parser.errors.count > 0) 
-        Log.e("ERROR", "Parsing errors: "+parser.errors.count);
+        if (parser.errors.count > 0) { 
+            Log.e("ERROR", "Parsing errors: "+parser.errors.count);
+        }
     } catch (UnsupportedEncodingException e) {
         e.printStackTrace();
     }
@@ -127,9 +128,8 @@ public BCalcToken Parse(Boolean b) {
 
 	BCalcToken  Expr() {
 		BCalcToken  x;
-		BCalcToken y; String op; 
-		y = Term();
-		x = y; 
+		BCalcToken y = null; String op; 
+		x = Term();
 		while (la.kind == 3 || la.kind == 4) {
 			if (la.kind == 3) {
 				Get();
@@ -137,8 +137,15 @@ public BCalcToken Parse(Boolean b) {
 				Get();
 			}
 			op=t.val; 
-			x = Term();
-			x = new SingleLineOperation(op, y, x); 
+			y = Term();
+			if(x == null) {
+			 x = BCalcToken.emptyToken;
+			}
+			if(y == null) {
+			  y = BCalcToken.emptyToken;
+			}
+			x = new OperationSingleLine(op, x, y); 
+			                                                                  
 		}
 		while (la.kind == 5 || la.kind == 6) {
 			if (la.kind == 5) {
@@ -147,7 +154,7 @@ public BCalcToken Parse(Boolean b) {
 				Get();
 			}
 			op=t.val; 
-			x = new SingleTermOperation(op, x); 
+			x = new OperationSingleTerm(op, x); 
 		}
 		return x;
 	}
@@ -155,8 +162,7 @@ public BCalcToken Parse(Boolean b) {
 	BCalcToken  Term() {
 		BCalcToken  x;
 		BCalcToken y; String op; 
-		y = Factor();
-		x = y; 
+		x = Factor();
 		while (StartOf(1)) {
 			if (la.kind == 7) {
 				Get();
@@ -169,12 +175,20 @@ public BCalcToken Parse(Boolean b) {
 			}
 			op=t.val; 
 			y = Factor();
-			if(op.equals("/") || op.equals("^")) {
-			 x = new MultipleLineOperation(op, x, y);
+			if(x == null) {
+			 x = BCalcToken.emptyToken;
+			}
+			if(y == null) {
+			  y = BCalcToken.emptyToken;
+			}
+			if(op.equals("/")) {
+			  x = new OperationDivision(op, x, y);
+			} else if(op.equals("^")) {
+			  x = new OperationPower(op, x, y);
 			} else {
-			  x = new SingleLineOperation(op, x, y);
+			  x = new OperationSingleLine(op, x, y);
 			} 
-			                                                                          
+			                                                                  
 		}
 		return x;
 	}
@@ -192,14 +206,14 @@ public BCalcToken Parse(Boolean b) {
 			Get();
 			op=t.val; 
 			y = Expr();
-			x = new SingleTermOperation(op, y); 
+			x = new OperationSingleTerm(op, y); 
 		} else if (la.kind == 10) {
 			Get();
 			op=op+t.val; 
 			y = Expr();
 			Expect(11);
 			op=op+t.val; 
-			x = new MultipleLineOperation(op, y); 
+			x = new OperationDivision(op, y); 
 		} else SynErr(14);
 		return x;
 	}

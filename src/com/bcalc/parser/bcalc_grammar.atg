@@ -19,8 +19,9 @@ public static BCalcToken parseBCalcExpression(String s)
         Scanner scanner = new Scanner(is);
         Parser parser = new Parser(scanner);
         x = parser.Parse(true);
-        if (parser.errors.count > 0) 
-        Log.e("ERROR", "Parsing errors: "+parser.errors.count);
+        if (parser.errors.count > 0) { 
+            Log.e("ERROR", "Parsing errors: "+parser.errors.count);
+        }
     } catch (UnsupportedEncodingException e) {
         e.printStackTrace();
     }
@@ -87,26 +88,43 @@ PRODUCTIONS
 //   Statement = ident "=" number { "+" number } .
 
 
-BCalc<out BCalcToken x>                                         //(. BCalcToken x; .)
+BCalc<out BCalcToken x>                                                     //(. BCalcToken x; .)
   = Expr<out x>                                                             (. Log.i("Parser", "Processing... "); .)
   .
   
-Expr<out BCalcToken x>                                                      (. BCalcToken y; String op; .)
-= Term<out y>                                                               (. x = y; .)
-  { ("+"|"-") (. op=t.val; .) Term<out x>                                   (. x = new SingleLineOperation(op, y, x); .)
+Expr<out BCalcToken x>                                                      (. BCalcToken y = null; String op; .)
+= Term<out x>                                                               
+  { ("+"|"-") (. op=t.val; .) Term<out y>                                   (. 
+          if(x == null) {
+            x = BCalcToken.emptyToken;
+          }
+          if(y == null) {
+            y = BCalcToken.emptyToken;
+          }
+          x = new OperationSingleLine(op, x, y); 
+                                                                            .)
   }
-  { ("!"|"%") (. op=t.val; .)                                               (. x = new SingleTermOperation(op, x); .)
+  { ("!"|"%") (. op=t.val; .)                                               (. x = new OperationSingleTerm(op, x); .)
   } 
   .
   
+//(. x = y; .)
 Term<out BCalcToken x>                                                      (. BCalcToken y; String op; .)
-= Factor<out y>                                                             (. x = y; .)
+= Factor<out x>                                                             
   { ("*"|"/"|"%"|"^") (. op=t.val; .) Factor<out y>                         (. 
-  if(op.equals("/") || op.equals("^")) {
-    x = new MultipleLineOperation(op, x, y);
-  } else {
-    x = new SingleLineOperation(op, x, y);
-  } 
+          if(x == null) {
+            x = BCalcToken.emptyToken;
+          }
+          if(y == null) {
+            y = BCalcToken.emptyToken;
+          }
+          if(op.equals("/")) {
+            x = new OperationDivision(op, x, y);
+          } else if(op.equals("^")) {
+            x = new OperationPower(op, x, y);
+          } else {
+            x = new OperationSingleLine(op, x, y);
+          } 
                                                                             .)
   } 
   .
@@ -114,8 +132,8 @@ Term<out BCalcToken x>                                                      (. B
 Factor<out BCalcToken x>                                                    (. x = null; BCalcToken y; String op = ""; .)
   = number                                                                  (. x = new Number(t.val); .)
   | Name<out y>                                                             (. x = y; .)
-  | "-" (. op=t.val; .) Expr<out y>                                         (. x = new SingleTermOperation(op, y); .)
-  | "(" (. op=op+t.val; .) Expr<out y> ")" (. op=op+t.val; .)               (. x = new MultipleLineOperation(op, y); .)
+  | "-" (. op=t.val; .) Expr<out y>                                         (. x = new OperationSingleTerm(op, y); .)
+  | "(" (. op=op+t.val; .) Expr<out y> ")" (. op=op+t.val; .)               (. x = new OperationDivision(op, y); .)
   .
   
 Name<out BCalcToken x>                                                      (. ArrayList<BCalcToken> args = null; String name; .)

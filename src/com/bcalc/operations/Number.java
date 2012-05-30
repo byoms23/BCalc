@@ -27,7 +27,7 @@ public class Number extends BCalcToken {
 	@Override
 	public void onDraw(Canvas canvas, Paint paint, int padLeft, int padUp, int cursorIndex, boolean Cursor) {
 //	    BCalcToken.drawRectangule(canvas, paint, padLeft, padUp, val.length());
-		BCalcToken.drawRectangule(canvas, paint, padLeft, padUp, getVisualWidth(), getVisualHeight());
+		BCalcToken.drawRectanguleDebug(canvas, paint, padLeft, padUp, getVisualWidth(), getVisualHeight());
 	    
 	    canvas.drawText(val, padLeft, padUp+getVisualHeight()-5, paint);
 	}

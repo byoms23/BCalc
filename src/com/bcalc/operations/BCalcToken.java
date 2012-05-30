@@ -12,6 +12,8 @@ public abstract class BCalcToken {
 	public final static int HEIGHT = 26;
 	public final static int SIZE = 24;
 	
+	public final static BCalcToken emptyToken = new EmptyToken();
+	
 	public abstract int getVisualHeight();
 	public abstract int getVisualWidth();
 	public abstract void onDraw(Canvas canvas, Paint paint, int padLeft, int padUp, int cursorIndex, boolean Cursor);
@@ -30,7 +32,7 @@ public abstract class BCalcToken {
     	paint.setColor(color);
 	}
 	
-	public static void drawRectangule(Canvas canvas, Paint paint, int posX, int posY, int width, int height) {
+	public static void drawRectanguleDebug(Canvas canvas, Paint paint, int posX, int posY, int width, int height) {
 //	    int color = paint.getColor();
 //	    paint.setColor(Color.BLUE);
 //	    
@@ -41,5 +43,11 @@ public abstract class BCalcToken {
 //    	
 //    	paint.setColor(color);
 	}
-
+	
+	public static void drawRectangule(Canvas canvas, Paint paint, int posX, int posY, int width, int height) {
+	    canvas.drawLine(posX, posY, posX+width, posY, paint);
+    	canvas.drawLine(posX+width, posY, posX+width, posY+height, paint);
+    	canvas.drawLine(posX, posY+height, posX+width, posY+height, paint);
+    	canvas.drawLine(posX, posY, posX, posY+height, paint);
+	}
 }
