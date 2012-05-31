@@ -181,6 +181,7 @@ public BCalcToken Parse(Boolean b) {
 			if(y == null) {
 			  y = BCalcToken.emptyToken;
 			}
+			
 			if(op.equals("/")) {
 			  x = new OperationDivision(op, x, y);
 			} else if(op.equals("^")) {
@@ -200,20 +201,27 @@ public BCalcToken Parse(Boolean b) {
 			Get();
 			x = new Number(t.val); 
 		} else if (la.kind == 1) {
-			y = Name();
-			x = y; 
+			x = Name();
 		} else if (la.kind == 4) {
 			Get();
 			op=t.val; 
 			y = Expr();
-			x = new OperationSingleTerm(op, y); 
+			if(y == null) {
+			 y = BCalcToken.emptyToken;
+			}
+			x = new OperationSingleTerm(op, y);
+																				
 		} else if (la.kind == 10) {
 			Get();
 			op=op+t.val; 
 			y = Expr();
 			Expect(11);
 			op=op+t.val; 
-			x = new OperationDivision(op, y); 
+			if(y == null) {
+			 y = BCalcToken.emptyToken;
+			}
+			x = new OperationParentheses(op, y);
+																				
 		} else SynErr(14);
 		return x;
 	}

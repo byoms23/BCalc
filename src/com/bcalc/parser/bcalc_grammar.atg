@@ -118,6 +118,7 @@ Term<out BCalcToken x>                                                      (. B
           if(y == null) {
             y = BCalcToken.emptyToken;
           }
+          
           if(op.equals("/")) {
             x = new OperationDivision(op, x, y);
           } else if(op.equals("^")) {
@@ -131,9 +132,19 @@ Term<out BCalcToken x>                                                      (. B
   
 Factor<out BCalcToken x>                                                    (. x = null; BCalcToken y; String op = ""; .)
   = number                                                                  (. x = new Number(t.val); .)
-  | Name<out y>                                                             (. x = y; .)
-  | "-" (. op=t.val; .) Expr<out y>                                         (. x = new OperationSingleTerm(op, y); .)
-  | "(" (. op=op+t.val; .) Expr<out y> ")" (. op=op+t.val; .)               (. x = new OperationDivision(op, y); .)
+  | Name<out x>                                                             
+  | "-" (. op=t.val; .) Expr<out y>                                         (. 
+  		if(y == null) {
+  		  y = BCalcToken.emptyToken;
+  		}
+  		x = new OperationSingleTerm(op, y);
+  																			.)
+  | "(" (. op=op+t.val; .) Expr<out y> ")" (. op=op+t.val; .)               (.
+  		if(y == null) {
+  		  y = BCalcToken.emptyToken;
+  		}
+  		x = new OperationParentheses(op, y);
+  																			.)
   .
   
 Name<out BCalcToken x>                                                      (. ArrayList<BCalcToken> args = null; String name; .)

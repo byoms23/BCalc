@@ -6,22 +6,14 @@ import android.util.Log;
 
 public class OperationDivision extends Operation {
 
-	private boolean isSingleTerm = false;
-	
 	public OperationDivision(String op, BCalcToken term1, BCalcToken term2) {
 		super(op, term1, term2);
-		// TODO Auto-generated constructor stub
-	}
-
-	public OperationDivision(String op, BCalcToken term1) {
-		super(op, term1, null);
-		this.setSingleTerm(true);
 	}
 
 	@Override
 	public int getVisualHeight() {
 		int height = 0;
-		if (op.equals("/")) {
+//		if (op.equals("/")) {
 			height += term1.getVisualHeight();
 			if(term2 != null) { 
 				height += term2.getVisualHeight(); 
@@ -30,36 +22,32 @@ public class OperationDivision extends Operation {
 			}
 			height += 1;
 			
-		} else if (op.equals("^")) {
-			return term1.getVisualHeight() + (term2.getVisualHeight() / 2);
-		} else {
-			height = HEIGHT;
-		}
+//		} else if (op.equals("^")) {
+//			return term1.getVisualHeight() + (term2.getVisualHeight() / 2);
+//		} else {
+//			height = HEIGHT;
+//		}
 		
 		return height;
 	}
 
 	@Override
 	public int getVisualWidth() {
-		// TODO Auto-generated method stub
 		int width = 0;
-		if (op.equals("/")) {
-			int w1 = term1.getVisualWidth();
-			if(term2 != null) {
-				int w2 = term2.getVisualWidth();
-				if(w1 > w2) {
-					width = w1;
-				} else {
-					width = w2;
-				}
+		
+		int w1 = term1.getVisualWidth();
+		if(term2 != null) {
+			int w2 = term2.getVisualWidth();
+			if(w1 > w2) {
+				width = w1;
 			} else {
-				width = w1; 
+				width = w2;
 			}
-			
-			width += PADDING_WORDS * 2;
-		} else if (op.equals("^")) {
-			return term1.getVisualHeight() + (term2.getVisualHeight() / 2);
+		} else {
+			width = w1; 
 		}
+		
+		width += PADDING_WORDS * 2;
 		
 		return width;
 	}
@@ -103,13 +91,5 @@ public class OperationDivision extends Operation {
 			
 		return 0;
 	}
-
-	public boolean isSingleTerm() {
-		return isSingleTerm;
-	}
-
-	public void setSingleTerm(boolean isSingleTerm) {
-		this.isSingleTerm = isSingleTerm;
-	}
-
+	
 }

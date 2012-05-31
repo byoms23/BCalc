@@ -27,6 +27,7 @@ public class CalcWidget extends EditText {
 	private OnCalcListener calcListener;
 	private BCalcToken calc;
 	protected InputMethodManager inputMethodManager;
+	private Scroller scroller;
 
 	public CalcWidget(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -69,7 +70,8 @@ public class CalcWidget extends EditText {
 		});
 		
 		// Create the horizontal scroll
-		setScroller(new Scroller(getContext()));
+		scroller = new Scroller(getContext());
+		setScroller(scroller);
 		setHorizontallyScrolling(true);
 		setHorizontalFadingEdgeEnabled(true);
 	}
@@ -95,6 +97,8 @@ public class CalcWidget extends EditText {
 		int width = calculateWidth(widthMeasureSpec);
 		int height = calculateHeight(heightMeasureSpec);
 
+//		scroller.setFinalX(width);
+//		scroller.setFinalY(height);
 		setMeasuredDimension(width, height);
 	}
 
@@ -138,7 +142,7 @@ public class CalcWidget extends EditText {
 
 		// Draw the text
 		Paint paint = new Paint();
-		paint.setStyle(Style.FILL_AND_STROKE);
+//		paint.setStyle(Style.FILL_AND_STROKE);
 		paint.setColor(Color.BLACK);
 		paint.setAntiAlias(true);
 		paint.setTextSize(BCalcToken.SIZE);
@@ -179,12 +183,12 @@ public class CalcWidget extends EditText {
 					lastCursorPosition, cursorDraw);
 
 			// Draw cursor
-			if (cursorDraw && hasFocus()) {
-				canvas.drawText("|", 15, 30, paint);
+			// if (cursorDraw && hasFocus()) {
+				// canvas.drawText("|", 15, 30, paint);
 				// canvas.drawText("|", 26, 30, paint);
 				// canvas.drawText("|", 37, 30, paint);
 				// canvas.drawText("|", 48, 30, paint);
-			}
+			// }
 			cursorDraw = !cursorDraw;
 
 			canvas.save();
@@ -199,5 +203,5 @@ public class CalcWidget extends EditText {
 
 	public void setCalcListener(OnCalcListener calcListener) {
 		this.calcListener = calcListener;
-	}
+	} 
 }
